@@ -41,8 +41,6 @@ public class LoginPage extends BaseTest{
         driver.findElement(passwordField).sendKeys(BadPassword);
     }
 
-
-
     public void submit() {
         driver.findElement(submitButton).click();
     }
