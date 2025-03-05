@@ -14,14 +14,19 @@ import org.testng.annotations.Parameters;
 
 import java.time.Duration;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class BaseTest {
     protected static WebDriver driver;
     protected static WebDriverWait wait;
+    private static final Logger logger = LogManager.getLogger(BaseTest.class);
 
     @BeforeClass
     @Parameters("browser")
     public void driverInitiate(@Optional("chrome") String browser) {
         if (driver == null) {
+            logger.info(STR."Starting tests in browser: \{browser}");
             switch (browser.toLowerCase()) {
                 case "firefox":
                     driver = new FirefoxDriver();
@@ -40,6 +45,7 @@ public class BaseTest {
     @AfterClass
     public void driverClose() {
         if (driver != null) {
+            logger.info(STR."Closing browser...");
             driver.quit();
             driver = null;
         }
