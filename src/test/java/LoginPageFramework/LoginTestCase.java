@@ -1,9 +1,6 @@
 package LoginPageFramework;
 
-import org.openqa.selenium.By;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
 
 
 public class LoginTestCase extends BaseTest {

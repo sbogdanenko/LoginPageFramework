@@ -1,5 +1,7 @@
 package LoginPageFramework;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import static org.testng.Assert.assertEquals;
@@ -7,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 
 public class LoginPage extends BaseTest{
     private static WebDriver driver;
+    private static final Logger logger = LogManager.getLogger(BaseTest.class);
 
     private By usernameField = By.id("username");
     private By passwordField = By.id("password");
@@ -56,17 +59,17 @@ public class LoginPage extends BaseTest{
     public void validateFailedLogin() {
         String currentUrl = driver.getCurrentUrl();
         assertEquals(currentUrl, LoginTestData.BASE_URL, "Base page should appear");
-        String actualErrorMessage = getErrorMessage();
-        System.out.println(STR."Error message text: \{errorMessage}");
-        assertEquals(actualErrorMessage, LoginTestData.FAILED_LOGIN_MESSAGE, "Error message should appear");
+        String actualLoginErrorMessage = getErrorMessage();
+        logger.info("Captured login error message: {}", actualLoginErrorMessage);
+        assertEquals(actualLoginErrorMessage, LoginTestData.FAILED_LOGIN_MESSAGE, "Error message should appear");
     }
 
     public void validateFailedPassword() {
         String currentUrl = driver.getCurrentUrl();
         assertEquals(currentUrl, LoginTestData.BASE_URL, "Base page should appear");
-        String actualErrorMessage = getErrorMessage();
-        System.out.println(STR."Error message text: \{errorMessage}");
-        assertEquals(actualErrorMessage, LoginTestData.FAILED_PASSWORD_MESSAGE, "Error message should appear");
+        String actualPasswordErrorMessage = getErrorMessage();
+        logger.info("Captured password error message: {}", actualPasswordErrorMessage);
+        assertEquals(actualPasswordErrorMessage, LoginTestData.FAILED_PASSWORD_MESSAGE, "Error message should appear");
     }
 
     public String getErrorMessage(){
