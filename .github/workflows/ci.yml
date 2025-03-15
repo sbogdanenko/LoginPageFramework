@@ -26,6 +26,9 @@ jobs:
           chrome-version: 'stable'
           install-chromedriver: true
 
+      - name: Install Allure Plugin
+        run: mvn org.apache.maven.plugins:maven-plugin-plugin:3.6.0:help
+
       - name: Run Tests with Headless Chrome
         run: mvn clean test -DargLine="--enable-preview"
 
@@ -37,8 +40,7 @@ jobs:
         run: |
           if [ -d "target/allure-results" ]; then
             echo "Generating Allure report..."
-            mvn allure:generate target/allure-results -o
-            mvn allure:report || echo "Allure report generation failed"
+            mvn io.qameta.allure:allure-maven:report
           else
             echo "Skipping Allure report generation: No test results found."
           fi
