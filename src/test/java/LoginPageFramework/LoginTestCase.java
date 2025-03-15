@@ -1,5 +1,6 @@
 package LoginPageFramework;
 
+import io.qameta.allure.*;
 import org.testng.annotations.Test;
 
 
@@ -7,6 +8,10 @@ public class LoginTestCase extends BaseTest {
     LoginPage loginPage;
 
     @Test
+    @Description("Verify login with valid credentials")
+    @Severity(SeverityLevel.CRITICAL)
+    @Story("Login Tests")
+
     void successfulLoginTest() {
         loginPage = new LoginPage(driver);
 
@@ -17,6 +22,10 @@ public class LoginTestCase extends BaseTest {
     }
 
     @Test
+    @Description("Verify login with invalid username")
+    @Severity(SeverityLevel.CRITICAL)
+    @Story("Login Tests")
+
     void failedLoginTest() {
         loginPage = new LoginPage(driver);
 
@@ -27,6 +36,9 @@ public class LoginTestCase extends BaseTest {
     }
 
     @Test
+    @Description("Verify login with invalid password")
+    @Severity(SeverityLevel.CRITICAL)
+    @Story("Login Tests")
     void failedPasswordTest() {
         loginPage = new LoginPage(driver);
 
