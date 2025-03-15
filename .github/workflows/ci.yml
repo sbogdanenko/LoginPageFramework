@@ -29,12 +29,17 @@ jobs:
           DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
 
-          # Download ChromeDriver
-          DRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .downloads.chromeDriver[] | select(.platform == \"linux64\") | .url")
+          # Debugging - Print API Response
+          echo "Fetching ChromeDriver info from API..."
+          API_RESPONSE=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json")
+          echo "$API_RESPONSE" | jq .
+
+          # Attempt to fetch ChromeDriver URL
+          DRIVER_URL=$(echo "$API_RESPONSE" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .downloads.chromeDriver[] | select(.platform == \"linux64\") | .url")
 
           if [[ -z "$DRIVER_URL" || "$DRIVER_URL" == "null" ]]; then
-            echo "Failed to fetch ChromeDriver download URL. Exiting."
-            exit 1
+            echo "Failed to fetch ChromeDriver download URL from API. Falling back to manual download."
+            DRIVER_URL="https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
           fi
 
           wget -q "$DRIVER_URL" -O chromedriver.zip
@@ -43,14 +48,14 @@ jobs:
           chmod +x /usr/local/bin/chromedriver
 
           # Fetch corresponding Chrome version
-          CHROME_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .version")
+          CHROME_VERSION=$(echo "$API_RESPONSE" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .version")
 
           if [[ -z "$CHROME_VERSION" || "$CHROME_VERSION" == "null" ]]; then
             echo "No exact Chrome version found for ChromeDriver $DRIVER_VERSION. Using latest stable Chrome."
             sudo apt install -y google-chrome-stable
           else
             echo "Installing Chrome version: $CHROME_VERSION"
-            sudo apt install -y google-chrome-stable=$CHROME_VERSION
+            sudo apt install -y google-chrome-stable=$CHROME_VERSION || sudo apt install -y google-chrome-stable
           fi
 
       - name: Set Chrome Permissions
