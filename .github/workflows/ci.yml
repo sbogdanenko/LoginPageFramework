@@ -29,6 +29,12 @@ jobs:
           sudo mv chromedriver /usr/local/bin/
           chmod +x /usr/local/bin/chromedriver
 
+      - name: Set Chrome Permissions
+        run: sudo chmod 777 /usr/bin/google-chrome
+
+      - name: Run Tests with Headless Chrome
+        run: mvn clean test -DargLine="--enable-preview"
+
       - name: Run Tests with Preview Features
         run: mvn clean test -Dmaven.compiler.release=21 -Dmaven.compiler.showWarnings=true -DargLine="--enable-preview"
 

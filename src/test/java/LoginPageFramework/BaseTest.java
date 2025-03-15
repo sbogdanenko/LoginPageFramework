@@ -3,6 +3,7 @@ package LoginPageFramework;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -36,7 +37,12 @@ public class BaseTest {
                     driver = new EdgeDriver();
                     break;
                 default:
-                    driver = new ChromeDriver();
+                    ChromeOptions options = new ChromeOptions();
+                    options.addArguments("--headless=new"); // Enable new headless mode
+                    options.addArguments("--no-sandbox");
+                    options.addArguments("--disable-dev-shm-usage");
+                    options.addArguments("--remote-allow-origins=*");
+                    driver = new ChromeDriver(options);
             }
             driver.manage().window().maximize();
             wait = new WebDriverWait(driver, Duration.ofSeconds(5));
