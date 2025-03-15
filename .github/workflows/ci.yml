@@ -20,28 +20,37 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Chrome & Matching ChromeDriver
+      - name: Install Stable Chrome & Matching ChromeDriver
         run: |
           sudo apt update
+          sudo apt install -y wget unzip
+
+          # Install latest stable Chrome
           sudo apt install -y google-chrome-stable
 
-          # Get the full Chrome version
-          FULL_CHROME_VERSION=$(google-chrome --version | grep -oP '(?<=Google Chrome )[\d.]+')
+          # Get full Chrome version
+          FULL_CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
           CHROME_MAJOR_VERSION=$(echo "$FULL_CHROME_VERSION" | cut -d. -f1)
           echo "Detected Chrome version: $FULL_CHROME_VERSION (Major: $CHROME_MAJOR_VERSION)"
 
-          # Fetch matching ChromeDriver version
-          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION)
-          if [[ -z "$DRIVER_VERSION" || "$DRIVER_VERSION" == *"Error"* ]]; then
-            echo "No exact match for ChromeDriver version, using latest available"
+          # Fetch matching ChromeDriver version using Google’s JSON API
+          DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version | startswith(\"$CHROME_MAJOR_VERSION\")) | .version" | head -n 1)
+
+          if [[ -z "$DRIVER_VERSION" ]]; then
+            echo "No exact match for ChromeDriver version, falling back to latest stable"
             DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
 
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
-          wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/chromedriver
+          DRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .downloads.chromeDriver[] | select(.platform == \"linux64\") | .url")
+
+          wget -q "$DRIVER_URL" -O chromedriver.zip
+          unzip chromedriver.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           chmod +x /usr/local/bin/chromedriver
+
+      - name: Install jq
+        run: sudo apt install -y jq
 
       - name: Set Chrome Permissions
         run: sudo chmod 777 /usr/bin/google-chrome
