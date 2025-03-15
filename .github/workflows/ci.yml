@@ -1,4 +1,4 @@
-name: Run Selenium Tests & View Allure Reports
+name: Run Selenium Tests & Deploy Allure Reports
 
 on:
   workflow_dispatch:
@@ -32,10 +32,6 @@ jobs:
       - name: Run Tests with Headless Chrome
         run: mvn clean test -DargLine="--enable-preview"
 
-      - name: Debug - Check Allure Results Directory
-        run: |
-          ls -la target/allure-results/ || echo "Allure results directory is missing!"
-
       - name: Generate Allure Report
         run: |
           if [ -d "target/allure-results" ]; then
@@ -45,14 +41,9 @@ jobs:
             echo "Skipping Allure report generation: No test results found."
           fi
 
-      - name: Manually Clone Upload-Artifact
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/actions
-          cd $GITHUB_WORKSPACE/actions
-          git clone https://github.com/actions/upload-artifact.git
-
-      - name: Upload Allure Report as Artifact
-        uses: ./actions/upload-artifact
+      - name: Deploy Allure Report to GitHub Pages
+        if: success()
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          name: allure-report
-          path: target/allure-results/
+          branch: gh-pages
+          folder: target/site/allure-maven/
