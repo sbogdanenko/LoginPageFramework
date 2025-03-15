@@ -20,25 +20,23 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Latest ChromeDriver & Matching Chrome
+      - name: Install ChromeDriver & Matching Chrome
         run: |
           sudo apt update
           sudo apt install -y wget unzip jq
 
-          # Fetch the latest stable ChromeDriver version
+          # Fetch the latest available ChromeDriver version
           DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
 
-          # Debugging - Print API Response
-          echo "Fetching ChromeDriver info from API..."
+          # Fetch ChromeDriver download URL from Google's API
           API_RESPONSE=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json")
+
           if [[ -z "$API_RESPONSE" || "$API_RESPONSE" == "null" ]]; then
             echo "Error: ChromeDriver API response is empty. Exiting."
             exit 1
           fi
-          echo "$API_RESPONSE" | jq .
 
-          # Attempt to fetch ChromeDriver URL
           DRIVER_URL=$(echo "$API_RESPONSE" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .downloads.chromeDriver[] | select(.platform == \"linux64\") | .url")
 
           if [[ -z "$DRIVER_URL" || "$DRIVER_URL" == "null" ]]; then
@@ -51,16 +49,21 @@ jobs:
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           chmod +x /usr/local/bin/chromedriver
 
-          # Fetch corresponding Chrome version
+          # Fetch the corresponding Chrome version
           CHROME_VERSION=$(echo "$API_RESPONSE" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .version")
 
           if [[ -z "$CHROME_VERSION" || "$CHROME_VERSION" == "null" ]]; then
-            echo "No exact Chrome version found for ChromeDriver $DRIVER_VERSION. Using latest stable Chrome."
-            sudo apt install -y google-chrome-stable
-          else
-            echo "Installing Chrome version: $CHROME_VERSION"
-            sudo apt install -y google-chrome-stable=$CHROME_VERSION || sudo apt install -y google-chrome-stable
+            echo "No exact Chrome version found for ChromeDriver $DRIVER_VERSION. Falling back to closest available version."
+            CHROME_VERSION=$(echo "$API_RESPONSE" | jq -r ".channels.Stable.versions | sort_by(.version) | reverse | .[0] | .version")
           fi
+
+          if [[ -z "$CHROME_VERSION" || "$CHROME_VERSION" == "null" ]]; then
+            echo "No compatible Chrome version found. Exiting."
+            exit 1
+          fi
+
+          echo "Installing Chrome version: $CHROME_VERSION"
+          sudo apt install -y google-chrome-stable=$CHROME_VERSION || sudo apt install -y google-chrome-stable
 
       - name: Set Chrome Permissions
         run: sudo chmod 777 /usr/bin/google-chrome
