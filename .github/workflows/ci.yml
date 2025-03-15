@@ -32,6 +32,10 @@ jobs:
           # Debugging - Print API Response
           echo "Fetching ChromeDriver info from API..."
           API_RESPONSE=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json")
+          if [[ -z "$API_RESPONSE" || "$API_RESPONSE" == "null" ]]; then
+            echo "Error: ChromeDriver API response is empty. Exiting."
+            exit 1
+          fi
           echo "$API_RESPONSE" | jq .
 
           # Attempt to fetch ChromeDriver URL
