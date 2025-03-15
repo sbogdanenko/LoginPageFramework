@@ -20,22 +20,22 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Stable Chrome & Matching ChromeDriver
+      - name: Install Chrome & Matching ChromeDriver
         run: |
           sudo apt update
           sudo apt install -y google-chrome-stable
-          
+
           # Extract major Chrome version
           CHROME_VERSION=$(google-chrome --version | grep -oP '(?<=Google Chrome )\d+')
           echo "Detected Chrome major version: $CHROME_VERSION"
-          
+
           # Fetch matching ChromeDriver version
           DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
           if [[ -z "$DRIVER_VERSION" || "$DRIVER_VERSION" == *"Error"* ]]; then
-            echo "Failed to retrieve exact ChromeDriver version, falling back to latest stable version"
+            echo "No exact match for ChromeDriver version, using latest available"
             DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
-          
+
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
           wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
