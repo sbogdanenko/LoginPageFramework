@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -35,8 +35,14 @@ jobs:
       - name: Generate Allure Report
         run: mvn allure:report
 
+      - name: Manually Clone Upload-Artifact
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/actions
+          cd $GITHUB_WORKSPACE/actions
+          git clone https://github.com/actions/upload-artifact.git
+
       - name: Upload Allure Report as Artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: ./actions/upload-artifact
         with:
           name: allure-report
           path: target/site/allure-maven/
@@ -44,7 +50,7 @@ jobs:
 
   deploy:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
