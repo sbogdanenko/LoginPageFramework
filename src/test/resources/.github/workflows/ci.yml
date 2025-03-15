@@ -1,3 +1,11 @@
+name: Run Selenium Tests & Publish Allure Report
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,8 +34,30 @@ jobs:
       - name: Generate Allure Report
         run: mvn allure:report
 
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: target/allure-results
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Allure Results
+        uses: actions/download-artifact@v3
+        with:
+          name: allure-results
+          path: target/allure-results
+
+      - name: Generate Allure Report
+        run: mvn allure:report
+
       - name: Deploy Allure Report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: target/site/allure-maven/index.html
+          folder: target/site/allure-maven/
