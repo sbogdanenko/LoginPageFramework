@@ -25,12 +25,13 @@ jobs:
           sudo apt update
           sudo apt install -y google-chrome-stable
 
-          # Extract major Chrome version
-          CHROME_VERSION=$(google-chrome --version | grep -oP '(?<=Google Chrome )\d+')
-          echo "Detected Chrome major version: $CHROME_VERSION"
+          # Get the full Chrome version
+          FULL_CHROME_VERSION=$(google-chrome --version | grep -oP '(?<=Google Chrome )[\d.]+')
+          CHROME_MAJOR_VERSION=$(echo "$FULL_CHROME_VERSION" | cut -d. -f1)
+          echo "Detected Chrome version: $FULL_CHROME_VERSION (Major: $CHROME_MAJOR_VERSION)"
 
           # Fetch matching ChromeDriver version
-          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
+          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION)
           if [[ -z "$DRIVER_VERSION" || "$DRIVER_VERSION" == *"Error"* ]]; then
             echo "No exact match for ChromeDriver version, using latest available"
             DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
