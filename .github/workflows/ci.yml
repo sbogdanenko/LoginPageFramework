@@ -37,6 +37,7 @@ jobs:
           if [ -d "target/allure-results" ]; then
             echo "Generating Allure report..."
             mvn io.qameta.allure:allure-maven:report
+            mkdir -p target/site/allure-maven/  # Ensure directory exists before deployment
           else
             echo "Skipping Allure report generation: No test results found."
           fi
