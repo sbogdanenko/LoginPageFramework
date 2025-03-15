@@ -17,7 +17,6 @@ import java.time.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static java.lang.StringTemplate.STR;
 
 public class BaseTest {
     protected static WebDriver driver;
@@ -28,7 +27,7 @@ public class BaseTest {
     @Parameters("browser")
     public void driverInitiate(@Optional("chrome") String browser) {
         if (driver == null) {
-            logger.info(STR."Starting tests in browser: \{browser}");
+            logger.info("Starting tests in browser: " + browser);
             switch (browser.toLowerCase()) {
                 case "firefox":
                     driver = new FirefoxDriver();
@@ -47,7 +46,7 @@ public class BaseTest {
     @AfterClass
     public void driverClose() {
         if (driver != null) {
-            logger.info(STR."Closing browser...");
+            logger.info("Closing browser...");
             driver.quit();
             driver = null;
         }
