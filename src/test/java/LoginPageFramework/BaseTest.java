@@ -38,7 +38,8 @@ public class BaseTest {
                     break;
                 default:
                     ChromeOptions options = new ChromeOptions();
-                    options.addArguments("--headless=new"); // Enable new headless mode
+                    options.setBinary("/usr/bin/google-chrome");
+                    options.addArguments("--headless=new");
                     options.addArguments("--no-sandbox");
                     options.addArguments("--disable-dev-shm-usage");
                     options.addArguments("--remote-allow-origins=*");
