@@ -29,12 +29,13 @@ jobs:
       - name: Run Tests with Headless Chrome
         run: mvn clean test -DargLine="--enable-preview"
 
-      - name: Debug - Check Allure Report Directory
+      - name: Debug - Check Allure Results Directory
         run: |
-          ls -la target/site/allure-maven/
+          ls -la target/allure-results/ || echo "Allure results directory is missing!"
 
       - name: Generate Allure Report
         run: |
+          mkdir -p target/site/allure-maven/
           mvn allure:report || echo "Allure report generation failed"
 
       - name: Manually Clone Upload-Artifact
