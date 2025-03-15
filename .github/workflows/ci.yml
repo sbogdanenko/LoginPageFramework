@@ -20,25 +20,19 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Chrome & ChromeDriver
+      - name: Install Stable Chrome & ChromeDriver
         run: |
           sudo apt update
           sudo apt install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
+          CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1-3)
           echo "Detected Chrome version: $CHROME_VERSION"
-          DRIVER_VERSION=""
-          for i in {1..5}; do
-            DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION) && break
-            echo "Retrying ChromeDriver version fetch..."
-            sleep 2
-          done
-          if [[ -z "$DRIVER_VERSION" ]]; then
-            echo "Failed to retrieve ChromeDriver version"
-            exit 1
+          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
+          if [[ -z "$DRIVER_VERSION" || "$DRIVER_VERSION" == *"Error"* ]]; then
+            echo "Failed to retrieve exact ChromeDriver version, falling back to latest stable version"
+            DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
-          wget -q --retry-connrefused --waitretry=2 --tries=5 \
-            "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver_linux64.zip
+          wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/chromedriver
           chmod +x /usr/local/bin/chromedriver
