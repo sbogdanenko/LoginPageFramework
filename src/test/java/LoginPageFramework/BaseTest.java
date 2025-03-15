@@ -38,7 +38,6 @@ public class BaseTest {
                     break;
                 default:
                     ChromeOptions options = new ChromeOptions();
-                    options.setBinary("/usr/bin/google-chrome");
                     options.addArguments("--headless=new");
                     options.addArguments("--no-sandbox");
                     options.addArguments("--disable-dev-shm-usage");
