@@ -20,10 +20,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Stable Chrome & Matching ChromeDriver
+      - name: Install Chrome & Matching ChromeDriver
         run: |
           sudo apt update
-          sudo apt install -y wget unzip
+          sudo apt install -y wget unzip jq
 
           # Install latest stable Chrome
           sudo apt install -y google-chrome-stable
@@ -36,21 +36,23 @@ jobs:
           # Fetch matching ChromeDriver version using Google’s JSON API
           DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version | startswith(\"$CHROME_MAJOR_VERSION\")) | .version" | head -n 1)
 
-          if [[ -z "$DRIVER_VERSION" ]]; then
-            echo "No exact match for ChromeDriver version, falling back to latest stable"
+          if [[ -z "$DRIVER_VERSION" || "$DRIVER_VERSION" == "null" ]]; then
+            echo "No exact match for ChromeDriver version found. Falling back to latest stable version."
             DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
 
           echo "Installing ChromeDriver version: $DRIVER_VERSION"
           DRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.versions[] | select(.version == \"$DRIVER_VERSION\") | .downloads.chromeDriver[] | select(.platform == \"linux64\") | .url")
 
+          if [[ -z "$DRIVER_URL" || "$DRIVER_URL" == "null" ]]; then
+            echo "Failed to fetch ChromeDriver download URL. Exiting."
+            exit 1
+          fi
+
           wget -q "$DRIVER_URL" -O chromedriver.zip
           unzip chromedriver.zip
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           chmod +x /usr/local/bin/chromedriver
-
-      - name: Install jq
-        run: sudo apt install -y jq
 
       - name: Set Chrome Permissions
         run: sudo chmod 777 /usr/bin/google-chrome
