@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -40,6 +40,7 @@ jobs:
         with:
           name: allure-report
           path: target/site/allure-maven/
+          if-no-files-found: warn
 
   deploy:
     needs: test
