@@ -1,6 +1,7 @@
-name: Run Selenium Tests & Publish Allure Report
+name: Run Selenium Tests & View Allure Reports
 
 on:
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
   push:
     branches:
       - main
@@ -34,11 +35,11 @@ jobs:
       - name: Generate Allure Report
         run: mvn allure:report
 
-      - name: Upload Test Results
+      - name: Upload Allure Report as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: allure-results
-          path: target/allure-results
+          name: allure-report
+          path: target/site/allure-maven/
 
   deploy:
     needs: test
@@ -47,14 +48,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download Allure Results
+      - name: Download Allure Report
         uses: actions/download-artifact@v3
         with:
-          name: allure-results
-          path: target/allure-results
-
-      - name: Generate Allure Report
-        run: mvn allure:report
+          name: allure-report
+          path: target/site/allure-maven/
 
       - name: Deploy Allure Report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
